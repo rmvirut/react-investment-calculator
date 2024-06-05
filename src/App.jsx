@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import Header from "./components/Header";
-import Calculator from "./components/Calculator";
-import Results from "./components/Results";
+import Header from "./components/Header.jsx";
+import Calculator from "./components/Calculator.jsx";
+import Results from "./components/Results.jsx";
 
-import { calculateInvestmentResults, formatter } from "./util/investment";
+import { calculateInvestmentResults } from "./util/investment";
 
 const INVEST_INFO = {
   initialInvestment: 0,
@@ -21,6 +21,23 @@ function App() {
   const [investInfo, setInvestInfo] = useState(INVEST_INFO);
   const [results, setResults] = useState([]);
 
+  const [userInput, setUserInput] = useState({
+    initialInvestment: 10000,
+    annnualInvestment: 1200,
+    expectedReturn: 6,
+    duration: 10,
+  });
+
+  const inputIsValid = investInfo.duration > 0;
+  function handleInput(inputIdentifier, newValue) {
+    setUserInput((previousUserInput) => {
+      // return a copy of the object instead of object itself to avoid passing by reference
+      return {
+        ...previousUserInput,
+        [inputIdentifier]: +newValue,
+      };
+    });
+  }
   function handleResults() {
     setResults(() => {
       let newResult = deriveResults(investInfo);
@@ -30,8 +47,8 @@ function App() {
 
   function handleInvestInfo(key, value) {
     setInvestInfo((oldInvestInfo) => {
-      oldInvestInfo[key] = value;
-      return oldInvestInfo;
+      oldInvestInfo[key] = +value;
+      return { ...oldInvestInfo };
     });
   }
 
@@ -42,8 +59,17 @@ function App() {
         <Calculator
           onValueEntered={handleInvestInfo}
           updateResults={handleResults}
+          userInput={investInfo}
         />
-        <Results results={results} invested={investInfo.initialInvestment} />
+        {inputIsValid ? (
+          <Results
+            inputData={investInfo}
+            results={results}
+            invested={investInfo.initialInvestment}
+          />
+        ) : (
+          <p className="center">Please enter a duration greater than 0</p>
+        )}
       </main>
     </>
   );

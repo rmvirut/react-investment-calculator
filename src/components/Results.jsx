@@ -1,6 +1,13 @@
 import { calculateInvestmentResults, formatter } from "../util/investment";
 
-export default function Results({ results, invested }) {
+export default function Results({ results, inputData }) {
+  //calculate results
+  const resultsArr = calculateInvestmentResults({ ...inputData });
+  const initialInvestment =
+    resultsArr[0].valueEndOfYear -
+    resultsArr[0].interest -
+    resultsArr[0].annualInvestment;
+
   return (
     <div className="center">
       <table id="result">
@@ -14,12 +21,12 @@ export default function Results({ results, invested }) {
           </tr>
         </thead>
         <tbody>
-          {results.map((result, index) => {
+          {resultsArr.map((result, index) => {
             return (
               <TableRow
                 key={index}
                 result={result}
-                invested={() => formatter.format(invested)}
+                initialInvestment={initialInvestment}
               />
             );
           })}
@@ -29,14 +36,21 @@ export default function Results({ results, invested }) {
   );
 }
 
-function TableRow({ result, invested }) {
+function TableRow({ result, initialInvestment }) {
+  const totalInterest =
+    result.valueEndOfYear -
+    result.annualInvestment * result.year -
+    initialInvestment;
+
+  const totalAmountInvested = result.valueEndOfYear - totalInterest;
+
   return (
     <tr>
       <td>{result.year}</td>
-      <td>{formatter.format(result.interest)}</td>
       <td>{formatter.format(result.valueEndOfYear)}</td>
-      <td>{formatter.format(result.annualInvestment)}</td>
-      <td>{invested}</td>
+      <td>{formatter.format(result.interest)}</td>
+      <td>{formatter.format(totalInterest)}</td>
+      <td>{formatter.format(totalAmountInvested)}</td>
     </tr>
   );
 }
